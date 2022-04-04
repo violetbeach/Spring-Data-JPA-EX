@@ -6,20 +6,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.entity.Member;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
 class MemberJpaRepositoryTest {
 
-    @Autowired MemberJpaRepository memberJpaRepository;
+    @Autowired MemberRepository memberRepository;
 
     @Test
     public void testMember() {
         Member member = new Member("memberA");
-        Member savedMember = memberJpaRepository.save(member);
+        Member savedMember = memberRepository.save(member);
 
-        Member findMember = memberJpaRepository.find(savedMember.getId());
+        Member findMember = memberRepository.findById(savedMember.getId()).orElse(new Member("default"));
 
         assertThat(findMember.getId()).isEqualTo(member.getId());
         assertThat(findMember.getUsername()).isEqualTo(member.getUsername());
