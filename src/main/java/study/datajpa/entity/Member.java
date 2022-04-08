@@ -10,7 +10,6 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString(of = {"id", "username", "age"})
 public class Member {
 
     @Id @GeneratedValue
@@ -21,7 +20,12 @@ public class Member {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
+    @ToString.Exclude
     private Team team;
+
+    public void setTeam(Team team) {
+        this.team = team;
+    }
 
     public Member(String username) {
         this.username = username;
