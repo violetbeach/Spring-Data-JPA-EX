@@ -3,6 +3,9 @@ package study.datajpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.entity.Member;
 
@@ -61,6 +64,23 @@ class MemberJpaRepositoryTest {
 
         Member result = memberRepository.findMemberByUsername("memberA");
         System.out.println(result);
+    }
+
+    @Test
+    public void paging() {
+        for(int i = 0; i<10; i++) {
+            memberRepository.save(new Member("member" + i, 10, null));
+        }
+
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+        Page<Member> result = memberRepository.findByAge(10, pageRequest);
+
+        assertThat(result.getContent().size()).isEqualTo(3);
+        assertThat(result.getTotalElements()).isEqualTo(10);
+        assertThat(result.getContent().get(0).getUsername()).isEqualTo("member9");
+        assertThat(result.getTotalPages()).isEqualTo(4);
+        assertThat(result.isFirst()).isTrue();
+        assertThat(result.hasNext()).isTrue();
     }
 
 }
