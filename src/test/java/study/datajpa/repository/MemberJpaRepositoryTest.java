@@ -124,6 +124,16 @@ class MemberJpaRepositoryTest {
 
     }
 
+    @Test
+    public void queryHint() {
+        Member member1 = new Member("member1", 10, null);
+        memberRepository.save(member1);
+        entityManager.flush();
+        entityManager.clear();
 
+        Member findMember = memberRepository.findReadOnlyByUsername("member1");
+        findMember.setUsername("member2");
+        entityManager.flush();
+    }
 
 }
