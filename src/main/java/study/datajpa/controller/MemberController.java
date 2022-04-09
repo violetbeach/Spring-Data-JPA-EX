@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 import study.datajpa.repository.MemberRepository;
 
@@ -24,8 +25,9 @@ public class MemberController {
     }
 
     @GetMapping("members")
-    public Page<Member> list(Pageable pageable) {
-        return memberRepository.findAll(pageable);
+    public Page<MemberDto> list(Pageable pageable) {
+        return memberRepository.findAll(pageable)
+                .map(MemberDto::new);
     }
 
     @PostConstruct
