@@ -5,19 +5,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.entity.Member;
+import study.datajpa.entity.Team;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
+@Rollback(value = false)
 class MemberJpaRepositoryTest {
 
     @Autowired MemberRepository memberRepository;
+    @Autowired TeamRepository teamRepository;
+    @PersistenceContext
+    EntityManager entityManager;
 
     @Test
     public void testMember() {
@@ -39,6 +48,8 @@ class MemberJpaRepositoryTest {
         memberRepository.save(m2);
 
         List<Member> result = memberRepository.findByUsernameAndAgeGreaterThan("member", 15);
+        entityManager.flush();
+        entityManager.clear();
 
         assertThat(result.get(0).getAge()).isEqualTo(20);
     }
@@ -73,14 +84,46 @@ class MemberJpaRepositoryTest {
         }
 
         PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
-        Page<Member> result = memberRepository.findByAge(10, pageRequest);
+        Slice<Member> result = memberRepository.findByAge(10, pageRequest);
 
         assertThat(result.getContent().size()).isEqualTo(3);
-        assertThat(result.getTotalElements()).isEqualTo(10);
         assertThat(result.getContent().get(0).getUsername()).isEqualTo("member9");
-        assertThat(result.getTotalPages()).isEqualTo(4);
         assertThat(result.isFirst()).isTrue();
         assertThat(result.hasNext()).isTrue();
     }
+
+    @Test
+    public void bulkAgePlusAll() {
+        memberRepository.save(new Member("member1", 10, null));
+        memberRepository.save(new Member("member1", 10, null));
+
+        int updated = memberRepository.bulkAgePlus(5);
+        entityManager.flush();
+        
+        List<Member> member = memberRepository.findUser("member1", 10);
+
+        assertThat(updated).isEqualTo(2);
+    }
+
+    @Test
+    public void findMemberLazy() {
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 10, teamB);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        List<Member> members = memberRepository.findAll();
+
+    }
+
+
 
 }
