@@ -136,4 +136,14 @@ class MemberJpaRepositoryTest {
         entityManager.flush();
     }
 
+    @Test
+    public void lock() {
+        Member member1 = new Member("member1", 10, null);
+        memberRepository.save(member1);
+        entityManager.flush();
+        entityManager.clear();
+
+        List<Member> findMember = memberRepository.findLockByUsername("member1");
+    }
+
 }
