@@ -151,4 +151,25 @@ class MemberJpaRepositoryTest {
         List<Member> result = memberRepository.findMemberCustom();
     }
 
+    @Test
+    public void projections() {
+        Team teamA = new Team("teamA");
+        teamRepository.save(teamA);
+
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 10, teamA);
+        entityManager.persist(member1);
+        entityManager.persist(member2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        List<UsernameOnly> result1 = memberRepository.findProjectionsByUsername("member1");
+
+        List<UsernameOnlyDto> result2 = memberRepository.findProjectionByUsername("member2");
+
+        List<UsernameOnlyDto> result3 = memberRepository.findCustomByUsername("member1", UsernameOnlyDto.class);
+
+    }
+
 }
